@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Mycelia index
+mycelia.db
+mycelia.db.tmp-*
+mycelia.db.lock
