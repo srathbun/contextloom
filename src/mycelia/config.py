@@ -30,6 +30,9 @@ DEFAULT_IGNORES: list[str] = [
     ".mypy_cache/",
     "*.pyc",
     "*.pyo",
+    "mycelia.db",
+    "mycelia.db.tmp-*",
+    "mycelia.db.lock",
 ]
 
 # Files larger than this (bytes) are tagged ``status='unsupported'`` / ``too_large``

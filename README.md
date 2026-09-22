@@ -12,16 +12,16 @@ queryable index (a spiritual successor to `cscope`) that covers both code
 
 ## Status
 
-The foundation milestone is implemented and tested:
+All of `DESIGN.md` §9 is implemented and tested:
 
-- index discovery, schema, and creation (`mycelia init`)
-- schema-version enforcement and atomic build-and-swap machinery
-- health summary (`mycelia status`)
-- project configuration stored in the index (`mycelia config get/set`)
+- `init` / `update` / `status` / `gc` — index lifecycle, atomic swap, freshness
+- Layer 1 structural extraction: tree-sitter (code) + a markdown/prose parser
+- Layer 2 heuristic linkage (filename/path and identifier mentions) + confidence enum
+- `find` / `refs` / `refby` / `near` with `--json` (agent-facing contract)
+- self-healing queries: stale indexes are transparently re-indexed (§10)
+- `infer` — Layer 3 boundary (opt-in; requires an injected AI backend, none shipped)
 
-The indexing pipeline (Layer 1/2/3), query commands (`find`, `refs`, `refby`,
-`near`), staleness check, and `update`/`gc`/`infer` land in subsequent milestones
-per the build order in `DESIGN.md` §12.
+The post-commit hook example lives in `hooks/post-commit` (§11.4).
 
 ## Install
 
@@ -41,9 +41,12 @@ pip install mycelia
 
 ```bash
 mycelia init                    # create mycelia.db in the current directory
+mycelia update                  # index the tree (also runs automatically when stale)
+mycelia find greet --json       # definitions + references to `greet`
+mycelia refs pkg/main.py        # outgoing references from a file
+mycelia refby pkg/util.py       # everything that references a file/symbol
+mycelia near pkg/main.py        # structural neighbors
 mycelia status                  # schema version, counts, last full index
-mycelia status --json           # machine-readable output
-mycelia config get fuzzy_level          # -> "generous"
 mycelia config set fuzzy_level balanced
 ```
 
@@ -56,13 +59,16 @@ add `mycelia.db` (and `mycelia.db.tmp-*`) to `.gitignore`.
 | Command | Description |
 |---|---|
 | `mycelia init [--force]` | Create a new index in the current directory |
+| `mycelia update [--full] [--json]` | Reindex (full rebuild + atomic swap) |
 | `mycelia status [--json]` | Index health: schema/version, counts, last full index |
-| `mycelia config get <key> [--json]` | Read a config value |
-| `mycelia config set <key> <value>` | Write a config value |
+| `mycelia find <symbol> [--scope …] [--kind …] [--json]` | Find definitions and references |
+| `mycelia refs <path> [--json]` | Outgoing references from a file/symbol |
+| `mycelia refby <path> [--json]` | Incoming references to a file/symbol |
+| `mycelia near <path> [--json]` | Structural neighbors (same file/directory) |
+| `mycelia config get/set <key> [value]` | Read/write a config value |
+| `mycelia gc [--ai-refs] [--json]` | Prune rows for missing files (optionally AI refs) |
+| `mycelia infer [--scope …] [--json]` | Optional Layer 3 linkage (opt-in, needs a backend) |
 | `mycelia --version` | Print the version |
-
-Planned per `DESIGN.md` §9: `update`, `find`, `refs`, `refby`, `near`, `infer`,
-`gc`.
 
 ## Development
 
