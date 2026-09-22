@@ -45,7 +45,16 @@ DEFAULT_FUZZY_LEVEL: str = "generous"
 # Layer 3 (AI) linkage opt-in; enabling only makes ``infer`` available (§6.3).
 DEFAULT_AI_ENABLED: bool = False
 
-KNOWN_KEYS: tuple[str, ...] = ("ignores", "max_file_size", "fuzzy_level", "ai_enabled")
+# Ollama model used by ``infer`` (Layer 3) when no custom backend is injected.
+DEFAULT_AI_MODEL: str = "gpt-oss:20b"
+
+KNOWN_KEYS: tuple[str, ...] = (
+    "ignores",
+    "max_file_size",
+    "fuzzy_level",
+    "ai_enabled",
+    "ai_model",
+)
 FUZZY_LEVELS: tuple[str, ...] = ("generous", "balanced", "strict")
 
 
@@ -56,6 +65,7 @@ def default_config() -> dict[str, str]:
         "max_file_size": json.dumps(DEFAULT_MAX_FILE_SIZE),
         "fuzzy_level": json.dumps(DEFAULT_FUZZY_LEVEL),
         "ai_enabled": json.dumps(DEFAULT_AI_ENABLED),
+        "ai_model": json.dumps(DEFAULT_AI_MODEL),
     }
 
 
@@ -88,6 +98,10 @@ def normalize_config_value(key: str, raw: str) -> str:
         if raw not in ("true", "false"):
             raise MyceliaError("'ai_enabled' must be 'true' or 'false'")
         return raw
+    if key == "ai_model":
+        if not raw.strip():
+            raise MyceliaError("'ai_model' must be a non-empty model name")
+        return json.dumps(raw)
     return raw
 
 

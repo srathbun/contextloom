@@ -96,3 +96,32 @@ def test_gc_removes_missing_file(tmp_path: Path) -> None:
         assert "README.md" not in paths
     finally:
         conn.close()
+
+
+def test_update_preserves_ai_refs(tmp_path: Path) -> None:
+    _write_sample(tmp_path)
+    create_index(tmp_path)
+    update(tmp_path)
+
+    conn = open_index(discover_index(tmp_path), readonly=False)
+    try:
+        ids = {r["path"]: r["id"] for r in conn.execute("SELECT id, path FROM files")}
+        conn.execute(
+            "INSERT INTO refs (from_file_id, to_file_id, ref_kind, source, confidence, evidence) "
+            "VALUES (?, ?, 'inferred_related', 'ai', 'ai_inferred', 'test link')",
+            (ids["pkg/main.py"], ids["pkg/util.py"]),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    # A rebuild must not silently drop AI-inferred refs.
+    update(tmp_path)
+    conn = _open(tmp_path)
+    try:
+        n = conn.execute("SELECT COUNT(*) FROM refs WHERE source = 'ai'").fetchone()[0]
+        assert n == 1
+    finally:
+        conn.close()
+
+    assert gc(tmp_path, ai_refs=True)["removed_refs"] == 1

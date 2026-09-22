@@ -347,6 +347,9 @@ def update(root: Path, *, full: bool = False) -> dict[str, Any]:
 
         entries = _collect(root, ignores, max_size)
         files_rows, symbols_rows, refs_rows, issues_rows = _extract(entries)
+        # AI-inferred refs (Layer 3) are not regenerated; carry them forward so a
+        # rebuild does not silently drop them (they are pruned via `gc --ai-refs`).
+        refs_rows.extend(_existing_ai_refs(index))
 
         # Diff against previous index for reporting.
         old_paths: set[str] = set()
@@ -387,6 +390,37 @@ def _current_schema_version() -> int:
     from mycelia.db import SCHEMA_VERSION
 
     return SCHEMA_VERSION
+
+
+def _existing_ai_refs(index: Path) -> list[tuple[Any, ...]]:
+    """AI-inferred refs currently stored, as build tuples (carried across rebuilds)."""
+    try:
+        conn = open_index(index, readonly=True)
+        rows: list[tuple[Any, ...]] = []
+        for r in conn.execute(
+            "SELECT f.path AS from_path, t.path AS to_path, r.line, r.ref_kind, "
+            "r.source, r.confidence, r.evidence "
+            "FROM refs r "
+            "JOIN files f ON r.from_file_id = f.id "
+            "LEFT JOIN files t ON r.to_file_id = t.id "
+            "WHERE r.source = 'ai'"
+        ):
+            rows.append(
+                (
+                    r["from_path"],
+                    r["to_path"],
+                    None,
+                    r["line"],
+                    r["ref_kind"],
+                    r["source"],
+                    r["confidence"],
+                    r["evidence"],
+                )
+            )
+        conn.close()
+        return rows
+    except Exception:
+        return []
 
 
 def _json_int(raw: str | None, default: int) -> int:
