@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from mycelia.indexer.enums import (
+from contextloom.indexer.enums import (
     CONFIDENCE_STRUCTURAL,
     REF_KIND_CALLS,
     REF_KIND_IMPORTS,

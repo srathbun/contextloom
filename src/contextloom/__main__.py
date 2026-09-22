@@ -1,8 +1,8 @@
-"""``python -m mycelia`` entry point."""
+"""``python -m contextloom`` entry point."""
 
 from __future__ import annotations
 
-from mycelia.cli import main
+from contextloom.cli import main
 
 if __name__ == "__main__":
     raise SystemExit(main())

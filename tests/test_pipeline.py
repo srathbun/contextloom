@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from mycelia import query
-from mycelia.db import create_index, discover_index, open_index
-from mycelia.staleness import gc, is_stale, update
+from contextloom import query
+from contextloom.db import create_index, discover_index, open_index
+from contextloom.staleness import gc, is_stale, update
 
 
 def _write_sample(root: Path) -> None:
@@ -65,7 +65,7 @@ def test_update_excludes_index_file(tmp_path: Path) -> None:
     conn = _open(tmp_path)
     try:
         paths = [r["path"] for r in conn.execute("SELECT path FROM files")]
-        assert "mycelia.db" not in paths
+        assert "contextloom.db" not in paths
     finally:
         conn.close()
 

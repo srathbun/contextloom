@@ -446,7 +446,7 @@ Seeded by `init`, editable via `config get/set`:
 1. **Package/CLI name.** Needs a PyPI availability check and should be
    distinct enough from `cscope`/`ctags`/`gtags` to avoid confusion. This
    determines the index filename convention (`<name>.db`) referenced
-   throughout this doc. **Answer** I have chosen Mycelia for the name.
+   throughout this doc. **Answer** I have chosen Contextloom for the name.
 2. **Content hash algorithm** for `files.hash` — recommend a fast
    non-cryptographic or lightweight hash (e.g. `blake3` if the dependency is
    acceptable, else stdlib `hashlib.sha1`) since this is purely a

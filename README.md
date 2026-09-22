@@ -1,10 +1,10 @@
-# mycelia
+# contextloom
 
 Cscope-style structural + fuzzy reference indexing for any project — code, docs,
 and prose — stored in a local SQLite index, built for AI coding agents to query
 instead of grepping.
 
-`mycelia` builds a self-healing, incrementally-maintained index of a project's
+`contextloom` builds a self-healing, incrementally-maintained index of a project's
 structure, symbols, and cross-references. It is an offline-built, instantly
 queryable index (a spiritual successor to `cscope`) that covers both code
 (structural) and prose (fuzzy/heuristic) content. The full design lives in
@@ -34,41 +34,41 @@ uv sync --extra dev   # development install (pulls pytest, ruff, mypy)
 or, from a release:
 
 ```bash
-pip install mycelia
+pip install contextloom
 ```
 
 ## Quickstart
 
 ```bash
-mycelia init                    # create mycelia.db in the current directory
-mycelia update                  # index the tree (also runs automatically when stale)
-mycelia find greet --json       # definitions + references to `greet`
-mycelia refs pkg/main.py        # outgoing references from a file
-mycelia refby pkg/util.py       # everything that references a file/symbol
-mycelia near pkg/main.py        # structural neighbors
-mycelia status                  # schema version, counts, last full index
-mycelia config set fuzzy_level balanced
+contextloom init                    # create contextloom.db in the current directory
+contextloom update                  # index the tree (also runs automatically when stale)
+contextloom find greet --json       # definitions + references to `greet`
+contextloom refs pkg/main.py        # outgoing references from a file
+contextloom refby pkg/util.py       # everything that references a file/symbol
+contextloom near pkg/main.py        # structural neighbors
+contextloom status                  # schema version, counts, last full index
+contextloom config set fuzzy_level balanced
 ```
 
 Configuration lives inside the index database (see `DESIGN.md` §5.4), so there
-is no separate config file to keep in sync. `mycelia init` prints a reminder to
-add `mycelia.db` (and `mycelia.db.tmp-*`) to `.gitignore`.
+is no separate config file to keep in sync. `contextloom init` prints a reminder to
+add `contextloom.db` (and `contextloom.db.tmp-*`) to `.gitignore`.
 
 ## CLI
 
 | Command | Description |
 |---|---|
-| `mycelia init [--force]` | Create a new index in the current directory |
-| `mycelia update [--full] [--json]` | Reindex (full rebuild + atomic swap) |
-| `mycelia status [--json]` | Index health: schema/version, counts, last full index |
-| `mycelia find <symbol> [--scope …] [--kind …] [--json]` | Find definitions and references |
-| `mycelia refs <path> [--json]` | Outgoing references from a file/symbol |
-| `mycelia refby <path> [--json]` | Incoming references to a file/symbol |
-| `mycelia near <path> [--json]` | Structural neighbors (same file/directory) |
-| `mycelia config get/set <key> [value]` | Read/write a config value |
-| `mycelia gc [--ai-refs] [--json]` | Prune rows for missing files (optionally AI refs) |
-| `mycelia infer [--scope …] [--json]` | Optional Layer 3 linkage (opt-in, needs a backend) |
-| `mycelia --version` | Print the version |
+| `contextloom init [--force]` | Create a new index in the current directory |
+| `contextloom update [--full] [--json]` | Reindex (full rebuild + atomic swap) |
+| `contextloom status [--json]` | Index health: schema/version, counts, last full index |
+| `contextloom find <symbol> [--scope …] [--kind …] [--json]` | Find definitions and references |
+| `contextloom refs <path> [--json]` | Outgoing references from a file/symbol |
+| `contextloom refby <path> [--json]` | Incoming references to a file/symbol |
+| `contextloom near <path> [--json]` | Structural neighbors (same file/directory) |
+| `contextloom config get/set <key> [value]` | Read/write a config value |
+| `contextloom gc [--ai-refs] [--json]` | Prune rows for missing files (optionally AI refs) |
+| `contextloom infer [--scope …] [--json]` | Optional Layer 3 linkage (opt-in, needs a backend) |
+| `contextloom --version` | Print the version |
 
 ## Development
 

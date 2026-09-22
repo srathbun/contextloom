@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from mycelia.indexer.classify import classify_file
-from mycelia.indexer.code import extract_code, extract_structural_refs, extract_symbols
-from mycelia.indexer.heuristic import link_heuristic
-from mycelia.indexer.markdown import extract_markdown
+from contextloom.indexer.classify import classify_file
+from contextloom.indexer.code import extract_code, extract_structural_refs, extract_symbols
+from contextloom.indexer.heuristic import link_heuristic
+from contextloom.indexer.markdown import extract_markdown
 
 __all__ = [
     "classify_file",

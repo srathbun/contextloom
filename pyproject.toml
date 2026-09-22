@@ -3,7 +3,7 @@ requires = ["hatchling>=1.25"]
 build-backend = "hatchling.build"
 
 [project]
-name = "mycelia"
+name = "contextloom"
 version = "0.1.0"
 description = "Cscope-style structural and fuzzy reference indexing for code, docs, and prose"
 readme = "README.md"
@@ -36,10 +36,10 @@ dev = [
 ]
 
 [project.scripts]
-mycelia = "mycelia.cli:main"
+contextloom = "contextloom.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/mycelia"]
+packages = ["src/contextloom"]
 
 [tool.ruff]
 line-length = 100

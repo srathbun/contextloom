@@ -1,6 +1,6 @@
 """SQLite index storage, schema, and concurrency primitives (DESIGN §5).
 
-Owns everything about the ``mycelia.db`` file on disk:
+Owns everything about the ``contextloom.db`` file on disk:
 
 * upward discovery (like git finding ``.git``)
 * creation and schema DDL, seeded with metadata and config
@@ -25,16 +25,16 @@ from typing import Any, BinaryIO
 from urllib.parse import quote
 from uuid import uuid4
 
-from mycelia import __version__
-from mycelia.config import decode_config_value, default_config
-from mycelia.errors import MyceliaError
+from contextloom import __version__
+from contextloom.config import decode_config_value, default_config
+from contextloom.errors import ContextloomError
 
 if sys.platform == "win32":
     import msvcrt
 else:
     import fcntl
 
-DB_FILENAME = "mycelia.db"
+DB_FILENAME = "contextloom.db"
 LOCK_SUFFIX = ".lock"
 SCHEMA_VERSION = 1
 TOOL_VERSION = __version__
@@ -86,7 +86,7 @@ SCHEMA: tuple[str, ...] = (
 
 
 def discover_index(start: Path | None = None) -> Path | None:
-    """Walk upward from ``start`` (default cwd) looking for ``mycelia.db``."""
+    """Walk upward from ``start`` (default cwd) looking for ``contextloom.db``."""
     current = (start or Path.cwd()).resolve()
     for directory in (current, *current.parents):
         candidate = directory / DB_FILENAME
@@ -109,19 +109,21 @@ def _connect(path: Path, *, readonly: bool) -> sqlite3.Connection:
 def _check_schema(conn: sqlite3.Connection) -> None:
     row = conn.execute("SELECT value FROM meta WHERE key = 'schema_version'").fetchone()
     if row is None:
-        raise MyceliaError("index has no 'schema_version'; run 'mycelia init --force' to rebuild")
+        raise ContextloomError(
+            "index has no 'schema_version'; run 'contextloom init --force' to rebuild"
+        )
     version = int(row["value"])
     if version != SCHEMA_VERSION:
-        raise MyceliaError(
+        raise ContextloomError(
             f"index schema v{version} is not supported (this build supports "
-            f"v{SCHEMA_VERSION}); run 'mycelia init --force' to rebuild"
+            f"v{SCHEMA_VERSION}); run 'contextloom init --force' to rebuild"
         )
 
 
 def open_index(path: Path, *, readonly: bool = False) -> sqlite3.Connection:
     """Open an index, enforcing the supported schema version."""
     if not path.is_file():
-        raise MyceliaError(f"no index at '{path}'; run 'mycelia init' first")
+        raise ContextloomError(f"no index at '{path}'; run 'contextloom init' first")
     conn = _connect(path, readonly=readonly)
     try:
         _check_schema(conn)
@@ -156,7 +158,7 @@ def create_index(root: Path, *, force: bool = False) -> Path:
     root.mkdir(parents=True, exist_ok=True)
     db_path = root / DB_FILENAME
     if db_path.exists() and not force:
-        raise MyceliaError(f"index already exists at '{db_path}'; use --force to overwrite")
+        raise ContextloomError(f"index already exists at '{db_path}'; use --force to overwrite")
 
     tmp = root / f"{DB_FILENAME}.tmp-{uuid4().hex}"
     try:
@@ -263,7 +265,7 @@ class IndexLock:
             _lock_file(fh)
         except OSError as exc:
             fh.close()
-            raise MyceliaError("another update is already in progress") from exc
+            raise ContextloomError("another update is already in progress") from exc
         self._fh = fh
         return self
 

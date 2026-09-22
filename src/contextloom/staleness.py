@@ -17,8 +17,8 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
-from mycelia.config import DEFAULT_IGNORES, DEFAULT_MAX_FILE_SIZE
-from mycelia.db import (
+from contextloom.config import DEFAULT_IGNORES, DEFAULT_MAX_FILE_SIZE
+from contextloom.db import (
     DB_FILENAME,
     SCHEMA,
     IndexLock,
@@ -26,13 +26,13 @@ from mycelia.db import (
     discover_index,
     open_index,
 )
-from mycelia.indexer import (
+from contextloom.indexer import (
     classify_file,
     extract_code,
     extract_markdown,
     link_heuristic,
 )
-from mycelia.indexer.enums import (
+from contextloom.indexer.enums import (
     FILES_KIND_CODE,
     FILES_KIND_MARKDOWN,
     FILES_KIND_TEXT,
@@ -387,7 +387,7 @@ def update(root: Path, *, full: bool = False) -> dict[str, Any]:
 
 def _current_schema_version() -> int:
     # SCHEMA is fixed; the supported version lives in db.
-    from mycelia.db import SCHEMA_VERSION
+    from contextloom.db import SCHEMA_VERSION
 
     return SCHEMA_VERSION
 

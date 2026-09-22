@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from mycelia.indexer.enums import (
+from contextloom.indexer.enums import (
     CONFIDENCE_EXACT_PROJECT_MATCH,
     CONFIDENCE_PATH_MENTION,
     REF_KIND_MENTIONS,

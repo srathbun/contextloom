@@ -7,11 +7,11 @@ from pathlib import Path
 
 import pytest
 
-from mycelia.config import DEFAULT_FUZZY_LEVEL, DEFAULT_IGNORES, DEFAULT_MAX_FILE_SIZE
-from mycelia.db import (
+from contextloom.config import DEFAULT_FUZZY_LEVEL, DEFAULT_IGNORES, DEFAULT_MAX_FILE_SIZE
+from contextloom.db import (
     SCHEMA_VERSION,
+    ContextloomError,
     IndexLock,
-    MyceliaError,
     create_index,
     discover_index,
     get_config,
@@ -25,7 +25,7 @@ EXPECTED_TABLES = {"meta", "files", "file_issues", "symbols", "refs", "config"}
 
 def test_init_seeds_schema_meta_and_config(tmp_path: Path) -> None:
     db = create_index(tmp_path)
-    assert db == tmp_path / "mycelia.db"
+    assert db == tmp_path / "contextloom.db"
     assert db.is_file()
 
     conn = open_index(db, readonly=True)
@@ -49,7 +49,7 @@ def test_init_seeds_schema_meta_and_config(tmp_path: Path) -> None:
 
 def test_init_refuses_existing_without_force(tmp_path: Path) -> None:
     create_index(tmp_path)
-    with pytest.raises(MyceliaError, match="already exists"):
+    with pytest.raises(ContextloomError, match="already exists"):
         create_index(tmp_path)
     assert create_index(tmp_path, force=True).is_file()
 
@@ -77,7 +77,7 @@ def test_open_enforces_schema_version(tmp_path: Path) -> None:
     conn.execute("UPDATE meta SET value = '999' WHERE key = 'schema_version'")
     conn.commit()
     conn.close()
-    with pytest.raises(MyceliaError, match="v999"):
+    with pytest.raises(ContextloomError, match="v999"):
         open_index(db, readonly=True)
 
 
@@ -93,7 +93,7 @@ def test_config_get_set_roundtrip(tmp_path: Path) -> None:
 def test_lock_is_exclusive(tmp_path: Path) -> None:
     db = create_index(tmp_path)
     with IndexLock(db):
-        with pytest.raises(MyceliaError, match="already in progress"):
+        with pytest.raises(ContextloomError, match="already in progress"):
             with IndexLock(db):
                 pass
     with IndexLock(db):

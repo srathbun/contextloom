@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from mycelia.indexer.enums import (
+from contextloom.indexer.enums import (
     CONFIDENCE_STRUCTURAL,
     REF_KIND_LINKS_TO,
     SOURCE_STRUCTURAL,

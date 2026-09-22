@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from mycelia.cli import main
+from contextloom.cli import main
 
 
 def test_init_then_status_json(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys) -> None:

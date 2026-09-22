@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Post-commit hook: eagerly refresh the mycelia index at commit boundaries
+# Post-commit hook: eagerly refresh the contextloom index at commit boundaries
 # (DESIGN §10). This is a performance optimization layered on top of the
 # self-healing check every query already performs — the index never depends on
 # this hook for correctness.
@@ -8,6 +8,6 @@
 #   cp hooks/post-commit .git/hooks/post-commit
 #   chmod +x .git/hooks/post-commit
 
-if command -v mycelia >/dev/null 2>&1; then
-    mycelia update >/dev/null 2>&1 || true
+if command -v contextloom >/dev/null 2>&1; then
+    contextloom update >/dev/null 2>&1 || true
 fi

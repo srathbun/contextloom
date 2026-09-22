@@ -15,7 +15,7 @@ import urllib.request
 from collections.abc import Callable
 from typing import Any
 
-from mycelia.errors import MyceliaError
+from contextloom.errors import ContextloomError
 
 OLLAMA_URL = "http://localhost:11434"
 DEFAULT_MODEL = "gpt-oss:20b"
@@ -62,9 +62,9 @@ def _ollama(model: str, prompt: str) -> str:
         with urllib.request.urlopen(req, timeout=600) as resp:
             body = json.loads(resp.read().decode("utf-8"))
     except urllib.error.URLError as exc:
-        raise MyceliaError(f"could not reach Ollama at {OLLAMA_URL}: {exc.reason}") from exc
+        raise ContextloomError(f"could not reach Ollama at {OLLAMA_URL}: {exc.reason}") from exc
     if "error" in body:
-        raise MyceliaError(f"Ollama error: {body['error']}")
+        raise ContextloomError(f"Ollama error: {body['error']}")
     return str(body.get("message", {}).get("content", ""))
 
 
@@ -86,7 +86,9 @@ def _listing(conn: sqlite3.Connection) -> str:
 def infer(conn: sqlite3.Connection, *, scope: str | None = None) -> list[dict[str, Any]]:
     """Propose and persist conceptual links (Layer 3)."""
     if _config(conn, "ai_enabled", False) is not True:
-        raise MyceliaError("Layer 3 is opt-in; enable with 'mycelia config set ai_enabled true'")
+        raise ContextloomError(
+            "Layer 3 is opt-in; enable with 'contextloom config set ai_enabled true'"
+        )
 
     model = _config(conn, "ai_model", DEFAULT_MODEL)
 
@@ -106,10 +108,10 @@ def infer(conn: sqlite3.Connection, *, scope: str | None = None) -> list[dict[st
         try:
             parsed = json.loads(raw)
         except json.JSONDecodeError as exc:
-            raise MyceliaError(f"model returned invalid JSON: {exc}") from exc
+            raise ContextloomError(f"model returned invalid JSON: {exc}") from exc
         links = parsed.get("links") if isinstance(parsed, dict) else None
         if not isinstance(links, list):
-            raise MyceliaError("model returned a malformed response (no 'links' array)")
+            raise ContextloomError("model returned a malformed response (no 'links' array)")
 
     written: list[dict[str, Any]] = []
     for link in links:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from mycelia.indexer.enums import (
+from contextloom.indexer.enums import (
     FILES_KIND_BINARY,
     FILES_KIND_CODE,
     FILES_KIND_MARKDOWN,

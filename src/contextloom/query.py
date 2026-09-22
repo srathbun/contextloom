@@ -1,4 +1,4 @@
-"""Query interface over the read-only mycelia index (DESIGN §9).
+"""Query interface over the read-only contextloom index (DESIGN §9).
 
 Every result dict carries the full field contract: ``path``, ``line``,
 ``line_end``, ``kind``, ``ref_kind``, ``source``, ``confidence``, ``evidence``,

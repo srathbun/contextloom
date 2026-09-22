@@ -2,7 +2,7 @@
 
 Configuration lives inside the index's ``config`` table, not in a separate repo
 file, so there is nothing to drift out of sync. ``init`` seeds these defaults;
-``mycelia config get/set`` reads and writes them. Values are JSON-encoded where
+``contextloom config get/set`` reads and writes them. Values are JSON-encoded where
 structured (see §5.4).
 """
 
@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from mycelia.errors import MyceliaError
+from contextloom.errors import ContextloomError
 
 # Built-in ignore patterns, applied in addition to any project ``.gitignore`` (§7).
 DEFAULT_IGNORES: list[str] = [
@@ -30,9 +30,9 @@ DEFAULT_IGNORES: list[str] = [
     ".mypy_cache/",
     "*.pyc",
     "*.pyo",
-    "mycelia.db",
-    "mycelia.db.tmp-*",
-    "mycelia.db.lock",
+    "contextloom.db",
+    "contextloom.db.tmp-*",
+    "contextloom.db.lock",
 ]
 
 # Files larger than this (bytes) are tagged ``status='unsupported'`` / ``too_large``
@@ -78,29 +78,29 @@ def normalize_config_value(key: str, raw: str) -> str:
         try:
             parsed: Any = json.loads(raw)
         except json.JSONDecodeError as exc:
-            raise MyceliaError("'ignores' must be a JSON array of strings") from exc
+            raise ContextloomError("'ignores' must be a JSON array of strings") from exc
         if not isinstance(parsed, list) or not all(isinstance(item, str) for item in parsed):
-            raise MyceliaError("'ignores' must be a JSON array of strings")
+            raise ContextloomError("'ignores' must be a JSON array of strings")
         return json.dumps(parsed)
     if key == "max_file_size":
         try:
             parsed = json.loads(raw)
         except json.JSONDecodeError as exc:
-            raise MyceliaError("'max_file_size' must be a non-negative integer") from exc
+            raise ContextloomError("'max_file_size' must be a non-negative integer") from exc
         if not isinstance(parsed, int) or isinstance(parsed, bool) or parsed < 0:
-            raise MyceliaError("'max_file_size' must be a non-negative integer")
+            raise ContextloomError("'max_file_size' must be a non-negative integer")
         return json.dumps(parsed)
     if key == "fuzzy_level":
         if raw not in FUZZY_LEVELS:
-            raise MyceliaError(f"'fuzzy_level' must be one of: {', '.join(FUZZY_LEVELS)}")
+            raise ContextloomError(f"'fuzzy_level' must be one of: {', '.join(FUZZY_LEVELS)}")
         return json.dumps(raw)
     if key == "ai_enabled":
         if raw not in ("true", "false"):
-            raise MyceliaError("'ai_enabled' must be 'true' or 'false'")
+            raise ContextloomError("'ai_enabled' must be 'true' or 'false'")
         return raw
     if key == "ai_model":
         if not raw.strip():
-            raise MyceliaError("'ai_model' must be a non-empty model name")
+            raise ContextloomError("'ai_model' must be a non-empty model name")
         return json.dumps(raw)
     return raw
 

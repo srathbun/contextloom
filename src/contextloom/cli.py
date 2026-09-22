@@ -15,12 +15,12 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 
-from mycelia import __version__, query
-from mycelia.config import KNOWN_KEYS, decode_config_value, normalize_config_value
-from mycelia.db import create_index, discover_index, get_config, open_index, set_config, status
-from mycelia.errors import MyceliaError
-from mycelia.infer import infer
-from mycelia.staleness import gc, is_stale, update
+from contextloom import __version__, query
+from contextloom.config import KNOWN_KEYS, decode_config_value, normalize_config_value
+from contextloom.db import create_index, discover_index, get_config, open_index, set_config, status
+from contextloom.errors import ContextloomError
+from contextloom.infer import infer
+from contextloom.staleness import gc, is_stale, update
 
 CommandHandler = Callable[[argparse.Namespace], int]
 
@@ -32,8 +32,9 @@ def _emit_json(obj: Any) -> None:
 def _require_index() -> Path:
     index = discover_index()
     if index is None:
-        raise MyceliaError(
-            "no 'mycelia.db' found in this directory or any parent; run 'mycelia init' first"
+        raise ContextloomError(
+            "no 'contextloom.db' found in this directory or any parent; "
+            "run 'contextloom init' first"
         )
     return index
 
@@ -69,13 +70,13 @@ def _print_results(results: list[dict[str, Any]], *, as_json: bool) -> None:
 def _cmd_init(args: argparse.Namespace) -> int:
     db_path = create_index(Path.cwd(), force=args.force)
     print(f"initialized index at {db_path}")
-    print("recommend adding 'mycelia.db' and 'mycelia.db.tmp-*' to .gitignore")
+    print("recommend adding 'contextloom.db' and 'contextloom.db.tmp-*' to .gitignore")
     return 0
 
 
 def _cmd_update(args: argparse.Namespace) -> int:
     if discover_index() is None:
-        raise MyceliaError("no index found; run 'mycelia init' first")
+        raise ContextloomError("no index found; run 'contextloom init' first")
     summary = update(Path.cwd(), full=args.full)
     if args.json:
         _emit_json(summary)
@@ -158,7 +159,7 @@ def _cmd_config(args: argparse.Namespace) -> int:
     if args.config_action == "get":
         raw = get_config(index, args.key)
         if raw is None:
-            raise MyceliaError(f"no config key '{args.key}'")
+            raise ContextloomError(f"no config key '{args.key}'")
         value = decode_config_value(raw)
         if args.json:
             _emit_json({args.key: value})
@@ -173,7 +174,7 @@ def _cmd_config(args: argparse.Namespace) -> int:
 
 def _cmd_gc(args: argparse.Namespace) -> int:
     if discover_index() is None:
-        raise MyceliaError("no index found; run 'mycelia init' first")
+        raise ContextloomError("no index found; run 'contextloom init' first")
     summary = gc(Path.cwd(), ai_refs=args.ai_refs)
     if args.json:
         _emit_json(summary)
@@ -195,7 +196,7 @@ def _cmd_infer(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="mycelia",
+        prog="contextloom",
         description="Structural and fuzzy reference index for code, docs, and prose.",
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
@@ -269,6 +270,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     handler: CommandHandler = args.func
     try:
         return handler(args)
-    except MyceliaError as exc:
+    except ContextloomError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
