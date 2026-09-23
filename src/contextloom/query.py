@@ -130,8 +130,8 @@ def find(
             "FROM refs r "
             "JOIN files f ON r.from_file_id = f.id "
             "LEFT JOIN files t ON r.to_file_id = t.id "
-            "WHERE r.to_symbol_id IN (SELECT id FROM symbols WHERE name = ?) "
-            "OR r.evidence = ? OR r.evidence LIKE ?"
+            "WHERE (r.to_symbol_id IN (SELECT id FROM symbols WHERE name = ?) "
+            "OR r.evidence = ? OR r.evidence LIKE ?)"
         )
         params = [name, name, name + ".%"]
         if kind == "call":

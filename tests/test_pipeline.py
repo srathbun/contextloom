@@ -125,3 +125,39 @@ def test_update_preserves_ai_refs(tmp_path: Path) -> None:
         conn.close()
 
     assert gc(tmp_path, ai_refs=True)["removed_refs"] == 1
+
+
+def test_find_kind_filters_references(tmp_path: Path) -> None:
+    """Regression: --kind must filter ref_kind, not just match the name.
+
+    Before the WHERE grouping fix, the kind filter bound only to the last
+    disjunction branch, so ``kind="call"`` also returned imports and mentions.
+    """
+    _write_sample(tmp_path)
+    create_index(tmp_path)
+    update(tmp_path)
+    conn = _open(tmp_path)
+    try:
+        calls = query.find(conn, "greet", root=tmp_path, kind="call")
+        assert calls, "expected at least one call site"
+        assert {r["ref_kind"] for r in calls} == {"calls"}
+
+        mentions = query.find(conn, "greet", root=tmp_path, kind="mention")
+        assert mentions, "expected at least one mention"
+        assert {r["ref_kind"] for r in mentions} <= {"mentions", "path_mention"}
+    finally:
+        conn.close()
+
+
+def test_find_scope_restricts_references(tmp_path: Path) -> None:
+    """Regression: --scope must restrict reference matches to the path prefix."""
+    _write_sample(tmp_path)
+    create_index(tmp_path)
+    update(tmp_path)
+    conn = _open(tmp_path)
+    try:
+        results = query.find(conn, "greet", root=tmp_path, scope="pkg")
+        assert results, "expected scoped results under pkg/"
+        assert all(r["path"].startswith("pkg/") for r in results)
+    finally:
+        conn.close()

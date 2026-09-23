@@ -70,6 +70,16 @@ add `contextloom.db` (and `contextloom.db.tmp-*`) to `.gitignore`.
 | `contextloom infer [--scope …] [--json]` | Optional Layer 3 linkage (opt-in, needs a backend) |
 | `contextloom --version` | Print the version |
 
+## AI Harness Skill
+
+An Oh My Pi (omp) skill that teaches an AI harness to use contextloom ships in
+[`skills/contextloom/`](skills/contextloom/). To install, copy the
+`skills/contextloom/` directory into any discovered skills root — a custom
+`skills.customDirectories` path, `~/.omp/agent/skills/`, or a plugin's `skills/`
+directory — as `skills/contextloom/SKILL.md`. The harness then triggers the
+skill on contextloom requests and reads the CLI/JSON contract from
+`skill://contextloom`.
+
 ## Development
 
 ```bash
